@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.37012.4 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Freelance Project Management Platform", "Freelance Project Management Platform\Freelance Project Management Platform.csproj", "{5B39879B-E8D7-4FC7-BF69-3765ABB24782}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5B39879B-E8D7-4FC7-BF69-3765ABB24782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B39879B-E8D7-4FC7-BF69-3765ABB24782}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B39879B-E8D7-4FC7-BF69-3765ABB24782}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B39879B-E8D7-4FC7-BF69-3765ABB24782}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4AC63EB1-D81C-4FB8-9129-44B87D3F4C75}
+	EndGlobalSection
+EndGlobal
