@@ -13,7 +13,8 @@ namespace Freelance_Project_Management_Platform.Data
         public DbSet<Proposal> Proposals { get; set; }
         public DbSet<TaskItem> TaskItems { get; set; }
         public DbSet<Message> Messages { get; set; }
-        public DbSet<UserToken> UserTokens { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -28,6 +29,10 @@ namespace Freelance_Project_Management_Platform.Data
                 .WithMany(u => u.AcceptedProjects)
                 .HasForeignKey(p => p.AcceptedFreelancerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Username)
+                .IsUnique();
         }
     }
 }
