@@ -9,9 +9,9 @@ namespace Freelance_Project_Management_Platform.Models
         public string? Description { get; set; }
         public decimal Budget { get; set; }
         public DateTime Deadline { get; set; }
-        public PROJECT_STATUS STATUS { get; set; }
-        public bool IsPaid { get; set; }
-        public DateTime CreatedAt { get; set; }
+        public PROJECT_STATUS Status { get; set; } = PROJECT_STATUS.OPEN;
+        public bool IsPaid { get; set; } = false;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 
         public int ClientId { get; set; }

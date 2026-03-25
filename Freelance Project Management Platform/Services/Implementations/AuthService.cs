@@ -42,6 +42,7 @@ public class AuthService : IAuthService
                 Email = email,
                 PasswordHash = _passwordHasher.HashPassword(null, request.Password),
                 Role = USER_ROLE.CLIENT,
+                CreatedAt = DateTime.UtcNow,
                 VerificationCode = GenerateVerificationCode(),
                 VerificationCodeExpires = DateTime.UtcNow.AddMinutes(10)
             };
@@ -103,6 +104,7 @@ public class AuthService : IAuthService
             await _context.SaveChangesAsync();
 
             return Success("Email verified successfully");
+
         }
         catch (Exception ex)
         {
@@ -136,6 +138,7 @@ public class AuthService : IAuthService
 
             return Success(tokens);
         }
+            
         catch (Exception ex)
         {
             return Error<UserToken>("An unexpected error occurred during login");
