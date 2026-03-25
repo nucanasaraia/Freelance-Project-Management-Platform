@@ -8,7 +8,7 @@ namespace Freelance_Project_Management_Platform.Services.Interfaces
     {
         Task<ApiResponse<ProjectDto>> CreateProject(AddProject request);
         Task<ApiResponse<List<ProjectDto>>> GetAllProjects();
-        Task<ApiResponse<ProjectDto>> GetProject(int id);
+        Task<ApiResponse<ProjectDto>> GetProject(int projectId);
         Task<ApiResponse<string>> UpdateProject(int projectId, AddProject request);
         Task<ApiResponse<string>> DeleteProject(int projectId);
         Task<ApiResponse<string>> MarkAsCompleted(int projectId);

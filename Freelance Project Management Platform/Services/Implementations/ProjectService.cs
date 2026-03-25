@@ -27,7 +27,6 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
         public  async Task<ApiResponse<ProjectDto>> CreateProject(AddProject request)
         {
             var userId = _currentUser.UserId;
-            var userExists = await _context.Users.AnyAsync(u => u.Id == userId);
 
             var newProject = _mapper.Map<Project>(request);
 
@@ -93,11 +92,11 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
             return ApiResponseFactory.Success(result);
         }
 
-        public async Task<ApiResponse<ProjectDto>> GetProject(int id)
+        public async Task<ApiResponse<ProjectDto>> GetProject(int projectId)
         {
             var userId = _currentUser.UserId;
             var project = await _context.Projects
-                .FirstOrDefaultAsync(p => p.Id == id && p.ClientId == userId);
+                .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
 
             if (project == null)
             {
