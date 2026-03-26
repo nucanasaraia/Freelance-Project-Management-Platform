@@ -40,8 +40,9 @@ public class AuthService : IAuthService
                 Username = request.Username,
                 Email = email,
                 PasswordHash = _passwordHasher.HashPassword(null, request.Password),
-                Role = USER_ROLE.CLIENT,
+                Role = request.Role == USER_ROLE.ADMIN ? USER_ROLE.CLIENT : request.Role,
                 CreatedAt = DateTime.UtcNow,
+                IsActive = true,
                 VerificationCode = GenerateVerificationCode(),
                 VerificationCodeExpires = DateTime.UtcNow.AddMinutes(10)
             };
