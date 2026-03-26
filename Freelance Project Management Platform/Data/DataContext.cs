@@ -5,9 +5,8 @@ namespace Freelance_Project_Management_Platform.Data
 {
     public class DataContext : DbContext
     {
-        public DataContext(DbContextOptions<DbContext> options) 
-        : base(options) { }
- 
+        public DataContext(DbContextOptions<DataContext> options) : base(options) { }
+
         public DbSet<User> Users { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<Proposal> Proposals { get; set; }

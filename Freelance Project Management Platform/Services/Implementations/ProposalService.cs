@@ -100,7 +100,15 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
             if (proposal.STATUS != PROPOSAL_STATUS.PENDING)
                 return ApiResponseFactory.BadRequest<string>("Proposal has already been accepted or rejected");
 
-            proposal.STATUS = PROPOSAL_STATUS.ACCEPTED; 
+            proposal.STATUS = PROPOSAL_STATUS.ACCEPTED;
+            proposal.Project.AcceptedFreelancerId = proposal.FreelancerId;
+            proposal.Project.Status = PROJECT_STATUS.IN_PROGRESS; 
+
+            var otherProposals = await _context.Proposals
+                .Where(p => p.ProjectId == proposal.ProjectId && p.Id != proposalId)
+                .ToListAsync();
+            otherProposals.ForEach(p => p.STATUS = PROPOSAL_STATUS.REJECTED);
+
             await _context.SaveChangesAsync();
 
             return ApiResponseFactory.Success("Proposal has been Accepted");
@@ -121,7 +129,7 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
             proposal.STATUS = PROPOSAL_STATUS.REJECTED;
             await _context.SaveChangesAsync();
 
-            return ApiResponseFactory.Success("Proposal has been Accepted");
+            return ApiResponseFactory.Success("Proposal has been Rejected");
         }
     }
 }
