@@ -32,6 +32,10 @@ namespace Freelance_Project_Management_Platform.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();
+
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.Email)
+                .IsUnique();
         }
     }
 }

@@ -28,7 +28,6 @@
     <Folder Include="Controllers\" />
     <Folder Include="Extensions\" />
     <Folder Include="Middleware\" />
-    <Folder Include="Helper\" />
     <Folder Include="Validations\" />
   </ItemGroup>
 

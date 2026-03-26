@@ -1,6 +1,4 @@
 ﻿using Freelance_Project_Management_Platform.Enum;
-using Freelance_Project_Management_Platform.Models;
-using Freelance_Project_Management_Platform.Services.Interfaces;
 
 namespace Freelance_Project_Management_Platform.DTOs
 {
