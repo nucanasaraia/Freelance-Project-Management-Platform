@@ -1,17 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Freelance_Project_Management_Platform</RootNamespace>
+    <UserSecretsId>c4d3a681-78f4-4628-b6fa-d2609192f207</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="16.1.1" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.1.1" />
+    <PackageReference Include="AutoMapper" Version="12.0.1" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
     <PackageReference Include="FluentValidation" Version="9.5.4" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="9.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.25" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.3.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">

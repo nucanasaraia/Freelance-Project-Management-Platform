@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
+using System.Text;
 
 namespace Freelance_Project_Management_Platform.Extensions
 {

@@ -29,6 +29,22 @@ namespace Freelance_Project_Management_Platform.Data
                 .HasForeignKey(p => p.AcceptedFreelancerId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<Project>()
+                .Property(p => p.Budget)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Sender)
+                .WithMany(u => u.SentMessages)
+                .HasForeignKey(m => m.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(m => m.Receiver)
+                .WithMany(u => u.ReceivedMessages)
+                .HasForeignKey(m => m.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Username)
                 .IsUnique();

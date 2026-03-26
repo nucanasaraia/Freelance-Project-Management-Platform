@@ -1,6 +1,7 @@
 ﻿using Freelance_Project_Management_Platform.Configurations;
 using Freelance_Project_Management_Platform.CORE;
 using Freelance_Project_Management_Platform.Services.Interfaces;
+using Microsoft.Extensions.Options;
 using System.Net;
 using System.Net.Mail;
 
@@ -9,9 +10,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
     public class EmailService : IEmailService
     {
         private readonly SmtpSettings _smtp;
-        public EmailService(SmtpSettings smtpSettings)
+        public EmailService(IOptions<SmtpSettings> smtpSettings)
         {
-            _smtp = smtpSettings;
+            _smtp = smtpSettings.Value;
         }
 
         public async Task<ApiResponse<string>> SendResetPasswordLink(string toEmail, string userName, string resetLink)

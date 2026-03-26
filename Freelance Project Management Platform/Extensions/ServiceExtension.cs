@@ -8,6 +8,8 @@ namespace Freelance_Project_Management_Platform.Extensions
     {
         public static void ConfigureServices(this IServiceCollection services)
         {
+            services.AddHttpContextAccessor();
+
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IProjectService, ProjectService>();
             services.AddScoped<IProposalService, ProposalService>();
