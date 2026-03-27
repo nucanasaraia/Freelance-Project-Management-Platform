@@ -35,6 +35,10 @@ namespace Freelance_Project_Management_Platform.Helper
             //Dashboard
             CreateMap<User, ClientDashboardDto>();
             CreateMap<User, FreelancerDashboardDto>();
+
+            //Payment
+            CreateMap<AddPayment, Payment>();
+            CreateMap<Payment, PaymentDto>();
         }
     }
 }

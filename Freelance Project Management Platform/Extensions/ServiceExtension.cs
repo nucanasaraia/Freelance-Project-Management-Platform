@@ -19,6 +19,7 @@ namespace Freelance_Project_Management_Platform.Extensions
             services.AddScoped<ITaskService, TaskService>();
             services.AddScoped<IMessageService, MessageService>();
             services.AddScoped<ICurrentUserService, CurrentUserService>();
+            services.AddScoped<IPaymentService, PaymentService>();
         }
     }
 }

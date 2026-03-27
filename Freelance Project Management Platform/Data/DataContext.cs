@@ -13,6 +13,7 @@ namespace Freelance_Project_Management_Platform.Data
         public DbSet<TaskItem> TaskItems { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Payment> Payments { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -52,6 +53,22 @@ namespace Freelance_Project_Management_Platform.Data
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Client)
+                .WithMany()
+                .HasForeignKey(p => p.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .HasOne(p => p.Freelancer)
+                .WithMany()
+                .HasForeignKey(p => p.FreelancerId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Payment>()
+                .Property(p => p.Amount)
+                .HasPrecision(18, 2);
         }
     }
 }
