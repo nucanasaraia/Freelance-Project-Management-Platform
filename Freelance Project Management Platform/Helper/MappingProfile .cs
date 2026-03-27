@@ -31,6 +31,10 @@ namespace Freelance_Project_Management_Platform.Helper
                            opt => opt.MapFrom(src => src.Sender.Username))
                 .ForMember(dest => dest.ReceiverUsername,
                            opt => opt.MapFrom(src => src.Receiver.Username));
+
+            //Dashboard
+            CreateMap<User, ClientDashboardDto>();
+            CreateMap<User, FreelancerDashboardDto>();
         }
     }
 }
