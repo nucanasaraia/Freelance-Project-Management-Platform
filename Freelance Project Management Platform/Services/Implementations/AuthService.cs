@@ -1,5 +1,6 @@
 ﻿using Freelance_Project_Management_Platform.CORE;
 using Freelance_Project_Management_Platform.Data;
+using Freelance_Project_Management_Platform.DTOs;
 using Freelance_Project_Management_Platform.Enum;
 using Freelance_Project_Management_Platform.Models;
 using Freelance_Project_Management_Platform.Request;
@@ -113,24 +114,23 @@ public class AuthService : IAuthService
     }
 
     // LOGIN 
-    public async Task<ApiResponse<UserToken>> LogIn(LogInRequest request)
+    public async Task<ApiResponse<AuthResponseDto>> LogIn(LogInRequest request)
     {
-        var username = request.Username.Trim().ToLower();
-        User? user = null;
-
         try
         {
-            user = await _context.Users.FirstOrDefaultAsync(x => x.Username.ToLower() == username);
+            var username = request.Username.Trim().ToLower();
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Username.ToLower() == username);
 
             if (user == null || !user.EmailVerified)
             {
-                return ApiResponseFactory.Unauthorized<UserToken>("Invalid credentials");
+                return ApiResponseFactory.Unauthorized<AuthResponseDto>("Invalid credentials");
             }
 
             var result = _passwordHasher.VerifyHashedPassword(user, user.PasswordHash, request.Password);
+
             if (result != PasswordVerificationResult.Success)
             {
-                return ApiResponseFactory.Unauthorized<UserToken>("Invalid credentials");
+                return ApiResponseFactory.Unauthorized<AuthResponseDto>("Invalid credentials");
             }
 
             var tokens = await GenerateTokens(user);
@@ -138,36 +138,38 @@ public class AuthService : IAuthService
 
             return ApiResponseFactory.Success(tokens);
         }
-            
-        catch (Exception ex)
+        catch
         {
-            return ApiResponseFactory.BadRequest<UserToken>("An unexpected error occurred during password reset");
+            return ApiResponseFactory.BadRequest<AuthResponseDto>("Login failed");
         }
     }
 
     // REFRESH TOKEN 
-    public async Task<ApiResponse<UserToken>> RefreshToken(string refreshToken)
+    public async Task<ApiResponse<AuthResponseDto>> RefreshToken(string refreshToken)
     {
         try
         {
             var hash = _tokenService.HashToken(refreshToken);
-            var token = await _context.RefreshTokens.Include(x => x.User)
+
+            var token = await _context.RefreshTokens
+                .Include(x => x.User)
                 .FirstOrDefaultAsync(x => x.TokenHash == hash && !x.IsRevoked && x.ExpiresAt > DateTime.UtcNow);
 
             if (token == null)
             {
-                return ApiResponseFactory.BadRequest<UserToken>("Invalid refresh token");
+                return ApiResponseFactory.BadRequest<AuthResponseDto>("Invalid refresh token");
             }
 
             token.IsRevoked = true;
+
             var tokens = await GenerateTokens(token.User);
             await _context.SaveChangesAsync();
 
             return ApiResponseFactory.Success(tokens);
         }
-        catch (Exception ex)
+        catch
         {
-            return ApiResponseFactory.BadRequest<UserToken>("An unexpected error occurred during password reset");
+            return ApiResponseFactory.BadRequest<AuthResponseDto>("Refresh failed");
         }
     }
 
@@ -229,7 +231,7 @@ public class AuthService : IAuthService
     }
 
     // HELPERS
-    private async Task<UserToken> GenerateTokens(User user)
+    private async Task<AuthResponseDto> GenerateTokens(User user)
     {
         var accessToken = _tokenService.GenerateAccessToken(user);
         var refreshToken = _tokenService.GenerateRefreshToken();
@@ -242,11 +244,10 @@ public class AuthService : IAuthService
             ExpiresAt = DateTime.UtcNow.AddDays(7)
         });
 
-        return new UserToken
+        return new AuthResponseDto
         {
-            Token = accessToken,
-            RefreshToken = refreshToken,
-            ExpiresAt = DateTime.UtcNow.AddMinutes(15)
+            AccessToken = accessToken,
+            RefreshToken = refreshToken
         };
     }
 
