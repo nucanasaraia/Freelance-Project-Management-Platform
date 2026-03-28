@@ -19,31 +19,46 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
         public async Task<ApiResponse<ClientDashboardDto>> GetClientDashboard(int clientId)
         {
-            var client = await _context.Users
+            try
+            {
+                var client = await _context.Users
                 .Include(p => p.ClientProjects)
                 .Include(p => p.Proposals)
                 .FirstOrDefaultAsync(c => c.Id == clientId);
 
-            if (client == null)
-                return ApiResponseFactory.NotFound<ClientDashboardDto>("Client not found");
+                if (client == null)
+                    return ApiResponseFactory.NotFound<ClientDashboardDto>("Client not found");
 
-            var result = _mapper.Map<ClientDashboardDto>(client);
-            return ApiResponseFactory.Success(result);
+                var result = _mapper.Map<ClientDashboardDto>(client);
+                return ApiResponseFactory.Success(result);
+            }
+            catch
+            {
+                return ApiResponseFactory.ServerError<ClientDashboardDto>("Unexpected error occurred");
+            }
         }
 
         public async Task<ApiResponse<FreelancerDashboardDto>> GetFreelancerDashboard(int freelancerId)
         {
-            var freelancer = await _context.Users
+            try
+            {
+                var freelancer = await _context.Users
                 .Include(p => p.AcceptedProjects)
                 .Include(p => p.Proposals)
                 .Include(p => p.AssignedTasks)
                 .FirstOrDefaultAsync(f => f.Id == freelancerId);
 
-            if (freelancer == null)
-                return ApiResponseFactory.NotFound<FreelancerDashboardDto>("Freelancer not found");
+                if (freelancer == null)
+                    return ApiResponseFactory.NotFound<FreelancerDashboardDto>("Freelancer not found");
 
-            var result = _mapper.Map<FreelancerDashboardDto>(freelancer);
-            return ApiResponseFactory.Success(result);
+                var result = _mapper.Map<FreelancerDashboardDto>(freelancer);
+                return ApiResponseFactory.Success(result);
+            }
+            catch
+            {
+                return ApiResponseFactory.ServerError<FreelancerDashboardDto>("Unexpected error occurred");
+
+            }
         }
     }
 }

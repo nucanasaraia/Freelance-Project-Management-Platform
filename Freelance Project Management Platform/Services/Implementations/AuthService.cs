@@ -16,13 +16,14 @@ public class AuthService : IAuthService
     private readonly IEmailService _emailService;
     private readonly PasswordHasher<User> _passwordHasher;
     private readonly ITokenService _tokenService;
-
-    public AuthService(DataContext context, IEmailService emailService,ITokenService tokenService)
+    private readonly IUserLoggerService _logger;
+    public AuthService(DataContext context, IEmailService emailService,ITokenService tokenService, IUserLoggerService logger)
     {
         _context = context;
         _emailService = emailService;
         _passwordHasher = new PasswordHasher<User>();
         _tokenService = tokenService;
+        _logger = logger;
     }
 
     // REGISTER 
@@ -33,6 +34,7 @@ public class AuthService : IAuthService
             var email = request.Email.Trim().ToLower();
             if (await _context.Users.AnyAsync(x => x.Email == email))
             {
+                _logger.LogWarning(null, "Registration failed - email already exists: {Email}", email);
                 return ApiResponseFactory.Conflict<string>("Email already exists");
             }
 
@@ -55,14 +57,17 @@ public class AuthService : IAuthService
 
             if (emailResult.Status != HttpStatusCode.OK)
             {
+                _logger.LogWarning(null, "Failed sending verification email");
                 return ApiResponseFactory.BadRequest<string>("Failed to send verification email");
             }
 
+            _logger.LogInfo(user, "New user registered: {Email}", email);
             return ApiResponseFactory.Success("Registration successful. Verify email.");
         }
         catch (Exception ex)
         {
-            return ApiResponseFactory.BadRequest<string>("An unexpected error occurred during password reset");
+            _logger.LogError(null, ex, "Unexpected error during registration");
+            return ApiResponseFactory.ServerError<string>("An unexpected error occurred during registration");
         }
     }
 
@@ -76,21 +81,26 @@ public class AuthService : IAuthService
 
             if (user == null)
             {
+                _logger.LogWarning(null, "Verification failed - invalid credentials: {Email}", email);
                 return ApiResponseFactory.BadRequest<string>("Invalid request");
             }
 
             if (user.VerificationAttempts >= 5)
             {
+                _logger.LogWarning(null, "Too many verification attempts");
                 return ApiResponseFactory.BadRequest<string>("Too many attempts");
             }
 
             if (user.VerificationCodeExpires < DateTime.UtcNow)
             {
+                _logger.LogWarning(null, "verification code expired");
                 return ApiResponseFactory.BadRequest<string>("Code expired");
             }
 
             if (user.VerificationCode != request.VerificationCode)
             {
+                _logger.LogWarning(null, "Invalid verification code");
+
                 user.VerificationAttempts++;
                 await _context.SaveChangesAsync();
 
@@ -104,12 +114,14 @@ public class AuthService : IAuthService
 
             await _context.SaveChangesAsync();
 
+            _logger.LogInfo(user, "Email verified successfully: {Email}", user.Email);
             return ApiResponseFactory.Success("Email verified successfully");
 
         }
         catch (Exception ex)
         {
-            return ApiResponseFactory.BadRequest<string>("An unexpected error occurred during password reset");
+            _logger.LogError(null, ex, "An unexpected error happened during email verification");
+            return ApiResponseFactory.ServerError<string>("An unexpected error occurred during email verification");
         }
     }
 
@@ -123,6 +135,7 @@ public class AuthService : IAuthService
 
             if (user == null || !user.EmailVerified)
             {
+                _logger.LogWarning(null, "Login failed - invalid credentials: {Username}", request.Username);
                 return ApiResponseFactory.Unauthorized<AuthResponseDto>("Invalid credentials");
             }
 
@@ -130,17 +143,20 @@ public class AuthService : IAuthService
 
             if (result != PasswordVerificationResult.Success)
             {
+                _logger.LogWarning(user, "Login failed - wrong password: {Username}", request.Username);
                 return ApiResponseFactory.Unauthorized<AuthResponseDto>("Invalid credentials");
             }
 
             var tokens = await GenerateTokens(user);
             await _context.SaveChangesAsync();
 
+            _logger.LogInfo(user, "User logged in successfully: {Username}", user.Username); 
             return ApiResponseFactory.Success(tokens);
         }
-        catch
+        catch(Exception ex) 
         {
-            return ApiResponseFactory.BadRequest<AuthResponseDto>("Login failed");
+            _logger.LogError(null, ex, "Unexpected error during login");
+            return ApiResponseFactory.ServerError<AuthResponseDto>("Login failed");
         }
     }
 
@@ -157,6 +173,7 @@ public class AuthService : IAuthService
 
             if (token == null)
             {
+                _logger.LogWarning(null, "Invalid or expired refresh token attempt");
                 return ApiResponseFactory.BadRequest<AuthResponseDto>("Invalid refresh token");
             }
 
@@ -165,11 +182,13 @@ public class AuthService : IAuthService
             var tokens = await GenerateTokens(token.User);
             await _context.SaveChangesAsync();
 
+            _logger.LogInfo(null, "Token refreshed successfully");
             return ApiResponseFactory.Success(tokens);
         }
-        catch
+        catch(Exception ex)
         {
-            return ApiResponseFactory.BadRequest<AuthResponseDto>("Refresh failed");
+            _logger.LogError(null, ex, "Unexpected error during refreshing token");
+            return ApiResponseFactory.ServerError<AuthResponseDto>("Refresh failed");
         }
     }
 
@@ -182,6 +201,7 @@ public class AuthService : IAuthService
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Email == email);
             if (user == null)
             {
+                _logger.LogWarning(null, "Wrong credentials: {Email}", email);
                 return ApiResponseFactory.Success("If this email exists, a reset link was sent");
             }
 
@@ -193,11 +213,13 @@ public class AuthService : IAuthService
             await _emailService.SendResetPasswordLink(user.Email, user.Username, resetLink);
             await _context.SaveChangesAsync();
 
+            _logger.LogInfo(user, "reset code sent successfully: {Email}", email);
             return ApiResponseFactory.Success("If this email exists, a reset link was sent");
         }
         catch (Exception ex)
         {
-            return ApiResponseFactory.BadRequest<string>("An unexpected error occurred during password reset");
+            _logger.LogError(null, ex, "Unexpected error during password reset");
+            return ApiResponseFactory.ServerError<string>("An unexpected error occurred during password reset");
         }
     }
 
@@ -213,6 +235,7 @@ public class AuthService : IAuthService
 
             if (user == null)
             {
+                _logger.LogWarning(null, "Invalid token");
                 return ApiResponseFactory.BadRequest<string>("Invalid or expired token");
             }
 
@@ -222,11 +245,13 @@ public class AuthService : IAuthService
 
             await _context.SaveChangesAsync();
 
+            _logger.LogInfo(user, "Password reset successfully");
             return ApiResponseFactory.Success("Password reset successful");
         }
         catch (Exception ex)
         {
-            return ApiResponseFactory.BadRequest<string>("An unexpected error occurred during password reset");
+            _logger.LogError(null, ex, "Unexpected error during password reset");
+            return ApiResponseFactory.ServerError<string>("An unexpected error occurred during password reset");
         }
     }
 

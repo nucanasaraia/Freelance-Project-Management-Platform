@@ -26,122 +26,171 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
         public  async Task<ApiResponse<ProjectDto>> CreateProject(AddProject request)
         {
-            var userId = _currentUser.UserId;
+            try
+            {
+                var userId = _currentUser.UserId;
 
-            var newProject = _mapper.Map<Project>(request);
+                var newProject = _mapper.Map<Project>(request);
 
-            newProject.ClientId = userId;
-            newProject.CreatedAt = DateTime.UtcNow;
+                newProject.ClientId = userId;
+                newProject.CreatedAt = DateTime.UtcNow;
 
-            await _context.Projects.AddAsync(newProject);
-            await _context.SaveChangesAsync();
+                await _context.Projects.AddAsync(newProject);
+                await _context.SaveChangesAsync();
 
-            var result = _mapper.Map<ProjectDto>(newProject);
-            return ApiResponseFactory.Success(result);
+                var result = _mapper.Map<ProjectDto>(newProject);
+                return ApiResponseFactory.Success(result);
+            }
+            catch
+            {
+                return ApiResponseFactory.ServerError<ProjectDto>("Unexpected error occurred");
+            }
         }
 
         public async Task<ApiResponse<string>> DeleteProject(int projectId)
         {
-            var userId = _currentUser.UserId;
-
-            var project = await _context.Projects
-                .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
-
-            if (project == null)
+            try
             {
-                return ApiResponseFactory.NotFound<string>("Project not found or access denied");
+                var userId = _currentUser.UserId;
+
+                var project = await _context.Projects
+                    .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
+
+                if (project == null)
+                {
+                    return ApiResponseFactory.NotFound<string>("Project not found or access denied");
+                }
+
+                _context.Projects.Remove(project);
+                await _context.SaveChangesAsync();
+
+                return ApiResponseFactory.Success("Project deleted successfully");
             }
-
-            _context.Projects.Remove(project);
-            await _context.SaveChangesAsync();
-
-            return ApiResponseFactory.Success("Project deleted successfully");
+            catch
+            {
+                return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
+            }
         }
 
         public async Task<ApiResponse<string>> UpdateProject(int projectId, AddProject request)
         {
-            var userId = _currentUser.UserId;
-            var project = await _context.Projects
-                            .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
-
-            if (project == null)
+            try
             {
-                return ApiResponseFactory.NotFound<string>("Project not found or access denied");
+                var userId = _currentUser.UserId;
+                var project = await _context.Projects
+                                .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
+
+                if (project == null)
+                {
+                    return ApiResponseFactory.NotFound<string>("Project not found or access denied");
+                }
+
+                _mapper.Map(request, project);
+                await _context.SaveChangesAsync();
+
+                return ApiResponseFactory.Success("Project updated successfully");
             }
-
-            _mapper.Map(request, project);
-            await _context.SaveChangesAsync();
-
-            return ApiResponseFactory.Success("Project updated successfully");
+            catch
+            {
+                return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
+            }
         }
 
         public async Task<ApiResponse<List<ProjectDto>>> GetAllProjects()
         {
-            var userId = _currentUser.UserId;
-
-            var projects = await _context.Projects
-                .Where(p => p.ClientId == userId)
-                .ToListAsync();
-
-            if (!projects.Any())
+            try
             {
-                return ApiResponseFactory.Success(new List<ProjectDto>());
-            }
+                var userId = _currentUser.UserId;
 
-            var result = _mapper.Map<List<ProjectDto>>(projects);
-            return ApiResponseFactory.Success(result);
+                var projects = await _context.Projects
+                    .Where(p => p.ClientId == userId)
+                    .ToListAsync();
+
+                if (!projects.Any())
+                {
+                    return ApiResponseFactory.Success(new List<ProjectDto>());
+                }
+
+                var result = _mapper.Map<List<ProjectDto>>(projects);
+                return ApiResponseFactory.Success(result);
+            }
+            catch
+            {
+                return ApiResponseFactory.ServerError<List<ProjectDto>>("Unexpected error occurred");
+            }
         }
 
         public async Task<ApiResponse<ProjectDto>> GetProject(int projectId)
         {
-            var userId = _currentUser.UserId;
-            var project = await _context.Projects
-                .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
-
-            if (project == null)
+            try
             {
-                return ApiResponseFactory.NotFound<ProjectDto>("Project not found or access denied");
-            }
+                var userId = _currentUser.UserId;
+                var project = await _context.Projects
+                    .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
 
-            var result = _mapper.Map<ProjectDto>(project);
-            return ApiResponseFactory.Success(result);
+                if (project == null)
+                {
+                    return ApiResponseFactory.NotFound<ProjectDto>("Project not found or access denied");
+                }
+
+                var result = _mapper.Map<ProjectDto>(project);
+                return ApiResponseFactory.Success(result);
+            }
+             catch
+            {
+                return ApiResponseFactory.ServerError<ProjectDto>("Unexpected error occurred");
+            }
         }
 
         public async Task<ApiResponse<string>> MarkAsCompleted(int projectId)
         {
-            var userId = _currentUser.UserId;
-            var project = await _context.Projects
-                .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
-           
-            if (project == null)
+            try
             {
-                return ApiResponseFactory.NotFound<string>("Project not found or access denied");
+                var userId = _currentUser.UserId;
+                var project = await _context.Projects
+                    .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
+
+                if (project == null)
+                {
+                    return ApiResponseFactory.NotFound<string>("Project not found or access denied");
+                }
+
+                if (project.Status == PROJECT_STATUS.COMPLETED)
+                    return ApiResponseFactory.BadRequest<string>("Project is already completed");
+
+                project.Status = PROJECT_STATUS.COMPLETED;
+                await _context.SaveChangesAsync();
+
+                return ApiResponseFactory.Success("Project has been marked as Completed");
             }
-
-            if (project.Status == PROJECT_STATUS.COMPLETED)
-                return ApiResponseFactory.BadRequest<string>("Project is already completed");
-
-            project.Status = PROJECT_STATUS.COMPLETED;
-            await _context.SaveChangesAsync();
-
-            return ApiResponseFactory.Success("Project has been marked as Completed");
+             catch
+            {
+                return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
+            }
         }
 
         public async Task<ApiResponse<string>> MarkAsPaid(int projectId)
         {
-            var userId = _currentUser.UserId;
-            var project = await _context.Projects
-                .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
-
-            if (project == null)
+            try
             {
-                return ApiResponseFactory.NotFound<string>("Project not found or access denied");
+                var userId = _currentUser.UserId;
+                var project = await _context.Projects
+                    .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
+
+                if (project == null)
+                {
+                    return ApiResponseFactory.NotFound<string>("Project not found or access denied");
+                }
+
+                project.IsPaid = true;
+                await _context.SaveChangesAsync();
+
+                return ApiResponseFactory.Success("Project has been marked as Paid");
             }
-
-            project.IsPaid = true;
-            await _context.SaveChangesAsync();
-
-            return ApiResponseFactory.Success("Project has been marked as Paid");
+            catch
+            {
+                return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
+            }
         }
     }
 }

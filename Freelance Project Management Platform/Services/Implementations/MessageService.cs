@@ -24,37 +24,54 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
         public async Task<ApiResponse<List<MessageDto>>> GetConversation(int otherUserId)
         {
-            var userId = _currentUser.UserId;
-
-            var messages = await _context.Messages
-                .Include(m => m.Sender)
-                .Include(m => m.Receiver)
-                .Where(m =>
-                    (m.SenderId == userId && m.ReceiverId == otherUserId) ||
-                    (m.SenderId == otherUserId && m.ReceiverId == userId))
-                .ToListAsync();
-
-            if (!messages.Any())
+            try
             {
-                return ApiResponseFactory.Success(new List<MessageDto>());
-            }
+                var userId = _currentUser.UserId;
 
-            var result = _mapper.Map<List<MessageDto>>(messages);
-            return ApiResponseFactory.Success(result);
+                var messages = await _context.Messages
+                    .Include(m => m.Sender)
+                    .Include(m => m.Receiver)
+                    .Where(m =>
+                        (m.SenderId == userId && m.ReceiverId == otherUserId) ||
+                        (m.SenderId == otherUserId && m.ReceiverId == userId))
+                    .ToListAsync();
+
+                if (!messages.Any())
+                {
+                    return ApiResponseFactory.Success(new List<MessageDto>());
+                }
+
+                var result = _mapper.Map<List<MessageDto>>(messages);
+                return ApiResponseFactory.Success(result);
+            }
+            catch
+            {
+                return ApiResponseFactory.ServerError<List<MessageDto>>("Unexpected error occurred");
+            }
         }
 
         public async Task<ApiResponse<string>> SendMessage(int receiverId, AddMessage request)
         {
-            var message = _mapper.Map<Message>(request);
+            try
+            {
+                var receiverExists = await _context.Users.AnyAsync(u => u.Id == receiverId);
+                if (!receiverExists)
+                    return ApiResponseFactory.NotFound<string>("Receiver not found");
 
-            message.SenderId = _currentUser.UserId; 
-            message.ReceiverId = receiverId;
-            message.CreatedAt = DateTime.UtcNow;
+                var message = _mapper.Map<Message>(request);
+                message.SenderId = _currentUser.UserId;
+                message.ReceiverId = receiverId;
+                message.CreatedAt = DateTime.UtcNow;
 
-            await _context.Messages.AddAsync(message);
-            await _context.SaveChangesAsync();
+                await _context.Messages.AddAsync(message);
+                await _context.SaveChangesAsync();
 
-            return ApiResponseFactory.Success("Message sent");
+                return ApiResponseFactory.Success("Message sent");
+            }
+            catch
+            {
+                return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
+            }
         }
     }
 }

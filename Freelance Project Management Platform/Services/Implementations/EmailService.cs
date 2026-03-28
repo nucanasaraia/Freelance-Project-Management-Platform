@@ -15,22 +15,42 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
             _smtp = smtpSettings.Value;
         }
 
-        public async Task<ApiResponse<string>> SendResetPasswordLink(string toEmail, string userName, string resetLink)
-        {
-            var subject = "Reset Your Password"; 
-            var body = GeneratePasswordResetEmailTemplate(userName, resetLink);
-
-            await SendEmailAsync(toEmail, subject, body);
-            return ApiResponseFactory.Success("Password reset email sent.");
-        }
-
         public async Task<ApiResponse<string>> SendVerificationCode(string toEmail, string userName, string code)
         {
-            var subject = "Your Verification Code";
-            var body = GenerateVerificationEmailTemplate(userName, code);
+            try
+            {
+                var subject = "Your Verification Code";
+                var body = GenerateVerificationEmailTemplate(userName, code);
+                await SendEmailAsync(toEmail, subject, body);
+                return ApiResponseFactory.Success("Verification code email sent.");
+            }
+            catch (SmtpException ex)
+            {
+                return ApiResponseFactory.ServerError<string>($"Failed to send verification email");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseFactory.ServerError<string>("Unexpected error occurred while sending email");
+            }
+        }
 
-            await SendEmailAsync(toEmail, subject, body);
-            return ApiResponseFactory.Success("verification code email sent.");
+        public async Task<ApiResponse<string>> SendResetPasswordLink(string toEmail, string userName, string resetLink)
+        {
+            try
+            {
+                var subject = "Reset Your Password";
+                var body = GeneratePasswordResetEmailTemplate(userName, resetLink);
+                await SendEmailAsync(toEmail, subject, body);
+                return ApiResponseFactory.Success("Password reset email sent.");
+            }
+            catch (SmtpException ex)
+            {
+                return ApiResponseFactory.ServerError<string>("Failed to send password reset email");
+            }
+            catch (Exception ex)
+            {
+                return ApiResponseFactory.ServerError<string>("Unexpected error occurred while sending email");
+            }
         }
 
         public async Task SendEmailAsync(string toEmail, string subject, string htmlBody)
