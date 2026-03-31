@@ -5,8 +5,8 @@ namespace Freelance_Project_Management_Platform.DTOs
 {
     public class ClientDashboardDto
     {
-        public string Username { get; set; }
-        public string Email { get; set; }
+        public required string Username { get; set; }
+        public required string Email { get; set; }
         public DateTime CreatedAt { get; set; }
         public bool IsActive { get; set; }
         public List<ProjectDto>? ClientProjects { get; set; }   

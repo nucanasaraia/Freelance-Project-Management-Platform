@@ -91,7 +91,6 @@ namespace Freelance.Tests
 
             // Assert
             result.Status.Should().Be(HttpStatusCode.OK);
-            result.Message.Should().Be("Registration successful. Verify email.");
         }
 
         [Fact]

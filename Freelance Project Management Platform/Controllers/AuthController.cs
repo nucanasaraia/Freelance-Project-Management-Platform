@@ -33,14 +33,14 @@ namespace Freelance_Project_Management_Platform.Controllers
         {
             var response = await _authService.LogIn(request);
 
-            if (response.Status != HttpStatusCode.OK)
+            if (response.Status != HttpStatusCode.OK || response.Data == null)
                 return StatusCode((int)response.Status, response);
 
             Response.Cookies.Append("refreshToken", response.Data.RefreshToken, new CookieOptions
             {
-                HttpOnly = true,     
-                Secure = true,      
-                SameSite = SameSiteMode.Strict, 
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
                 Expires = DateTime.UtcNow.AddDays(7)
             });
 
@@ -64,7 +64,7 @@ namespace Freelance_Project_Management_Platform.Controllers
 
             var response = await _authService.RefreshToken(refreshToken);
 
-            if (response.Status != HttpStatusCode.OK)
+            if (response.Status != HttpStatusCode.OK || response.Data == null)
                 return StatusCode((int)response.Status, response);
 
             Response.Cookies.Append("refreshToken", response.Data.RefreshToken, new CookieOptions

@@ -2,7 +2,7 @@
 {
     public class PasswordResetRequest
     {
-        public string Token { get; set; }
-        public string NewPassword { get; set; }
+        public required string Token { get; set; }
+        public required string NewPassword { get; set; }
     }
 }

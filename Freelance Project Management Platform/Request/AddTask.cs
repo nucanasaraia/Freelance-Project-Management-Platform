@@ -2,7 +2,7 @@
 {
     public class AddTask
     {
-        public string Title { get; set; }
+        public required string Title { get; set; }
         public string? Description { get; set; }
     }
 }

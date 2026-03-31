@@ -24,11 +24,11 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
                 await SendEmailAsync(toEmail, subject, body);
                 return ApiResponseFactory.Success("Verification code email sent.");
             }
-            catch (SmtpException ex)
+            catch (SmtpException)
             {
                 return ApiResponseFactory.ServerError<string>($"Failed to send verification email");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred while sending email");
             }
@@ -43,11 +43,11 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
                 await SendEmailAsync(toEmail, subject, body);
                 return ApiResponseFactory.Success("Password reset email sent.");
             }
-            catch (SmtpException ex)
+            catch (SmtpException)
             {
                 return ApiResponseFactory.ServerError<string>("Failed to send password reset email");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred while sending email");
             }

@@ -10,12 +10,12 @@ namespace Freelance_Project_Management_Platform.Models
         public DateTime CreatedAt { get; set; }
 
         public int ProjectId { get; set; }
-        public Project Project { get; set; }
+        public Project Project { get; set; } = null!;
 
         public int ClientId { get; set; }
-        public User Client {  get; set; }
+        public User Client { get; set; } = null!;
 
         public int FreelancerId { get; set; }
-        public User Freelancer { get; set; }
+        public User Freelancer { get; set; } = null!;
     }
 }

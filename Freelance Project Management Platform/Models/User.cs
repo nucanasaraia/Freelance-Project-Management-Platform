@@ -22,12 +22,12 @@ public class User
     public DateTime? PasswordResetTokenExpires { get; set; }
 
     // Relationships
-    public List<Project> ClientProjects { get; set; }
-    public List<Project> AcceptedProjects { get; set; }
+    public List<Project> ClientProjects { get; set; } = new();
+    public List<Project> AcceptedProjects { get; set; } = new();
 
-    public List<Proposal> Proposals { get; set; }
-    public List<TaskItem> AssignedTasks { get; set; }
+    public List<Proposal> Proposals { get; set; } = new();
+    public List<TaskItem> AssignedTasks { get; set; } = new();
 
-    public List<Message> SentMessages { get; set; }
-    public List<Message> ReceivedMessages { get; set; }
+    public List<Message> SentMessages { get; set; } = new();
+    public List<Message> ReceivedMessages { get; set; } = new();
 }

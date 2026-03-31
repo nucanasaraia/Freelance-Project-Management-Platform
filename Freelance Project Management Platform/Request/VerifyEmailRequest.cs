@@ -2,7 +2,7 @@
 {
     public class VerifyEmailRequest
     {
-        public string Email { get; set; }
-        public string VerificationCode { get; set; }
+        public required string Email { get; set; }
+        public required string VerificationCode { get; set; }
     }
 }
