@@ -16,12 +16,13 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUser;
-
-        public ProjectService(DataContext context, IMapper mapper, ICurrentUserService currentUser)
+        private readonly IUserLoggerService _logger;
+        public ProjectService(DataContext context, IMapper mapper, ICurrentUserService currentUser, IUserLoggerService logger)
         {
             _context = context;
             _mapper = mapper;
             _currentUser = currentUser;
+            _logger = logger;
         }
 
         public  async Task<ApiResponse<ProjectDto>> CreateProject(AddProject request)
@@ -41,8 +42,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
                 var result = _mapper.Map<ProjectDto>(newProject);
                 return ApiResponseFactory.Success(result);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(CreateProject));
                 return ApiResponseFactory.ServerError<ProjectDto>("Unexpected error occurred");
             }
         }
@@ -66,8 +68,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Project deleted successfully");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(DeleteProject));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }
@@ -90,8 +93,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Project updated successfully");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(UpdateProject));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }
@@ -114,8 +118,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
                 var result = _mapper.Map<List<ProjectDto>>(projects);
                 return ApiResponseFactory.Success(result);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(GetAllProjects));
                 return ApiResponseFactory.ServerError<List<ProjectDto>>("Unexpected error occurred");
             }
         }
@@ -136,8 +141,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
                 var result = _mapper.Map<ProjectDto>(project);
                 return ApiResponseFactory.Success(result);
             }
-             catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(GetProject));
                 return ApiResponseFactory.ServerError<ProjectDto>("Unexpected error occurred");
             }
         }
@@ -163,8 +169,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Project has been marked as Completed");
             }
-             catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(MarkAsCompleted));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }
@@ -173,22 +180,22 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
         {
             try
             {
-                var userId = _currentUser.UserId;
-                var project = await _context.Projects
-                    .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
+                var project = await _context.Projects.FindAsync(projectId);
 
                 if (project == null)
-                {
-                    return ApiResponseFactory.NotFound<string>("Project not found or access denied");
-                }
+                    return ApiResponseFactory.NotFound<string>("Project not found");
+
+                if (project.IsPaid)
+                    return ApiResponseFactory.BadRequest<string>("Project is already marked as paid");
 
                 project.IsPaid = true;
                 await _context.SaveChangesAsync();
 
                 return ApiResponseFactory.Success("Project has been marked as Paid");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(MarkAsPaid));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }

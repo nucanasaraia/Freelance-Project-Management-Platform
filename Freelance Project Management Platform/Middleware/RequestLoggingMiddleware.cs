@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Serilog.Context;
+﻿using Serilog.Context;
 using System.Diagnostics;
 using System.Security.Claims;
 

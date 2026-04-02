@@ -1,9 +1,11 @@
 ﻿using Freelance_Project_Management_Platform.Request;
 using Freelance_Project_Management_Platform.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Freelance_Project_Management_Platform.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PaymentController : ControllerBase

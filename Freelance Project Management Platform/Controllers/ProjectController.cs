@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Freelance_Project_Management_Platform.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ProjectController : ControllerBase
@@ -58,6 +59,7 @@ namespace Freelance_Project_Management_Platform.Controllers
             return StatusCode((int)result.Status, result);
         }
 
+        [Authorize(Roles = "ADMIN")]
         [HttpPatch("{id}/paid")]
         public async Task<IActionResult> MarkAsPaid(int id)
         {

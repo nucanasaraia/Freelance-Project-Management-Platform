@@ -1,7 +1,6 @@
 using Freelance_Project_Management_Platform.Configurations;
 using Freelance_Project_Management_Platform.Extensions;
 using Serilog;
-using StudentCourseManagement.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 

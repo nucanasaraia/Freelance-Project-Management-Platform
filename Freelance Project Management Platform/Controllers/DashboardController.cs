@@ -1,8 +1,10 @@
 ﻿using Freelance_Project_Management_Platform.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Freelance_Project_Management_Platform.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class DashboardController : ControllerBase

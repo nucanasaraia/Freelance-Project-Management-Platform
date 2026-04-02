@@ -1,6 +1,5 @@
 ﻿using Freelance_Project_Management_Platform.Services.Implementations;
 using Freelance_Project_Management_Platform.Services.Interfaces;
-using Microsoft.AspNetCore.Cors.Infrastructure;
 using StudentCourseManagement.Services.Implementations;
 
 namespace Freelance_Project_Management_Platform.Extensions
@@ -22,6 +21,7 @@ namespace Freelance_Project_Management_Platform.Extensions
             services.AddScoped<ICurrentUserService, CurrentUserService>();
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<IUserLoggerService, UserLoggerService>();
+            services.AddScoped<IDashboardService, DashboardService>();
         }
     }
 }

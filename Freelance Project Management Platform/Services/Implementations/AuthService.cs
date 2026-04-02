@@ -38,28 +38,30 @@ public class AuthService : IAuthService
                 return ApiResponseFactory.Conflict<string>("Email already exists");
             }
 
+            var verificationCode = GenerateVerificationCode();
+
             var user = new User
             {
                 Username = request.Username,
                 Email = email,
-                PasswordHash = _passwordHasher.HashPassword(null, request.Password),
+                PasswordHash = _passwordHasher.HashPassword(null!, request.Password),
                 Role = request.Role == USER_ROLE.ADMIN ? USER_ROLE.CLIENT : request.Role,
                 CreatedAt = DateTime.UtcNow,
                 IsActive = true,
-                VerificationCode = GenerateVerificationCode(),
+                VerificationCode = verificationCode,
                 VerificationCodeExpires = DateTime.UtcNow.AddMinutes(10)
             };
 
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            var emailResult = await _emailService.SendVerificationCode(user.Email, user.Username, user.VerificationCode);
+            var emailResult = await _emailService.SendVerificationCode(email, user.Username, verificationCode);
 
             if (emailResult.Status != HttpStatusCode.OK)
             {
-                _logger.LogWarning(null, "Failed sending verification email");
+                _logger.LogWarning(null, "Failed sending verification email to {Email}", email);
                 return ApiResponseFactory.BadRequest<string>("Failed to send verification email");
             }
+
+            _context.Users.Add(user);
+            await _context.SaveChangesAsync();
 
             _logger.LogInfo(user, "New user registered: {Email}", email);
             return ApiResponseFactory.Success("Registration successful. Verify email.");

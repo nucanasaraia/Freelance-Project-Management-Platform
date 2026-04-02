@@ -1,7 +1,6 @@
 ﻿
 using FluentValidation;
 using Freelance_Project_Management_Platform.Request;
-using Microsoft.AspNetCore.Identity.Data;
 
 public class RegisterValidator : AbstractValidator<RegistrationRequest>
 {

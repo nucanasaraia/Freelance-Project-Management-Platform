@@ -16,11 +16,13 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUser;
-        public TaskService(DataContext context, IMapper mapper, ICurrentUserService currentUser)
+        private readonly IUserLoggerService _logger;
+        public TaskService(DataContext context, IMapper mapper, ICurrentUserService currentUser, IUserLoggerService logger)
         {
             _context = context;
             _mapper = mapper;
             _currentUser = currentUser;
+            _logger = logger;
         }
 
         public async Task<ApiResponse<string>> AssignTask(int taskId, int assigneeId)
@@ -41,8 +43,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Task assigned successfully");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(AssignTask));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }
@@ -51,8 +54,13 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
         {
             try
             {
-                var task = _mapper.Map<TaskItem>(request);
+                var project = await _context.Projects
+                    .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == _currentUser.UserId);
 
+                if (project == null)
+                    return ApiResponseFactory.NotFound<TaskDto>("Project not found or access denied");
+
+                var task = _mapper.Map<TaskItem>(request);
                 task.ProjectId = projectId;
                 task.CreatedAt = DateTime.UtcNow;
                 task.Status = TASK_STATUS.TODO;
@@ -61,11 +69,11 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
                 await _context.SaveChangesAsync();
 
                 var result = _mapper.Map<TaskDto>(task);
-
                 return ApiResponseFactory.Success(result);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(CreateTask));
                 return ApiResponseFactory.ServerError<TaskDto>("Unexpected error occurred");
             }
         }
@@ -89,8 +97,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Task deleted successfully");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(DeleteTask));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }
@@ -118,8 +127,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
                 var result = _mapper.Map<List<TaskDto>>(tasks);
                 return ApiResponseFactory.Success(result);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(GetProjectTasks));
                 return ApiResponseFactory.ServerError<List<TaskDto>>("Unexpected error occurred");
             }
         }
@@ -146,8 +156,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Task updated successfully");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(UpdateTaskStatus));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }

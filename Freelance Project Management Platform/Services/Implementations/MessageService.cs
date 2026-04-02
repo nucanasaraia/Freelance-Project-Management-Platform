@@ -14,12 +14,14 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUser;
+        private readonly ILogger<DashboardService> _logger;
 
-        public MessageService(DataContext context, IMapper mapper, ICurrentUserService currentUser)
+        public MessageService(DataContext context, IMapper mapper, ICurrentUserService currentUser, ILogger<DashboardService> logger)
         {
             _context = context;
             _mapper = mapper;
             _currentUser = currentUser;
+            _logger = logger;
         }
 
         public async Task<ApiResponse<List<MessageDto>>> GetConversation(int otherUserId)
@@ -44,8 +46,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
                 var result = _mapper.Map<List<MessageDto>>(messages);
                 return ApiResponseFactory.Success(result);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error in {MethodName}", nameof(GetConversation));
                 return ApiResponseFactory.ServerError<List<MessageDto>>("Unexpected error occurred");
             }
         }
@@ -68,8 +71,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Message sent");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(ex, "Unexpected error in {MethodName}", nameof(SendMessage));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }

@@ -68,7 +68,7 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
             using var smtpClient = new SmtpClient(_smtp.Host)
             {
                 Port = _smtp.Port,
-                EnableSsl = _smtp.EnableSsl,
+                EnableSsl = _smtp.EnableSSl,
                 Credentials = new NetworkCredential(_smtp.SenderEmail, _smtp.AppPassword)
             };
 

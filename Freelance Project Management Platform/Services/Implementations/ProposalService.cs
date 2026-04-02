@@ -15,11 +15,13 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
         private readonly DataContext _context;
         private readonly IMapper _mapper;
         private readonly ICurrentUserService _currentUser;
-        public ProposalService(DataContext context, IMapper mapper, ICurrentUserService currentUser)
+        private readonly IUserLoggerService _logger;
+        public ProposalService(DataContext context, IMapper mapper, ICurrentUserService currentUser, IUserLoggerService logger)
         {
             _context = context;
             _mapper = mapper;
             _currentUser = currentUser;
+            _logger = logger;
         }
 
         public async Task<ApiResponse<string>> CreateProposal(int projectId, AddProposal request)
@@ -28,8 +30,20 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
             {
                 var userId = _currentUser.UserId;
 
-                var newProposal = _mapper.Map<Proposal>(request);
+                var user = await _context.Users.FindAsync(userId);
+                if (user == null || user.Role != USER_ROLE.FREELANCER)
+                    return ApiResponseFactory.Forbidden<string>("Only freelancers can submit proposals");
 
+                var alreadySubmitted = await _context.Proposals
+                    .AnyAsync(p => p.ProjectId == projectId && p.FreelancerId == userId);
+                if (alreadySubmitted)
+                    return ApiResponseFactory.Conflict<string>("You have already submitted a proposal for this project");
+
+                var projectExists = await _context.Projects.AnyAsync(p => p.Id == projectId);
+                if (!projectExists)
+                    return ApiResponseFactory.NotFound<string>("Project not found");
+
+                var newProposal = _mapper.Map<Proposal>(request);
                 newProposal.ProjectId = projectId;
                 newProposal.FreelancerId = userId;
                 newProposal.CreatedAt = DateTime.UtcNow;
@@ -39,8 +53,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Proposal created successfully");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(CreateProposal));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }
@@ -63,8 +78,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Proposal deleted successfully");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(DeleteProposal));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }
@@ -87,8 +103,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Proposal Updated successfully");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(UpdateProposal));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }
@@ -110,8 +127,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
                 var result = _mapper.Map<List<ProposalDto>>(proposals);
                 return ApiResponseFactory.Success(result);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(GetProjectProposals));
                 return ApiResponseFactory.ServerError<List<ProposalDto>>("Unexpected error occurred");
             }
         }
@@ -143,8 +161,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Proposal has been Accepted");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(AcceptProposal));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }
@@ -168,8 +187,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
 
                 return ApiResponseFactory.Success("Proposal has been Rejected");
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(RejectProposal));
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }

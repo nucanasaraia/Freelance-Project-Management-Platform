@@ -1,11 +1,13 @@
 ﻿using Freelance_Project_Management_Platform.CORE;
 using Freelance_Project_Management_Platform.DTOs;
 using Freelance_Project_Management_Platform.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Freelance_Project_Management_Platform.Controllers
 {
+    [Authorize(Roles = "ADMIN")]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase

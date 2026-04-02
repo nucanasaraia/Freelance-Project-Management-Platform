@@ -1,4 +1,4 @@
-﻿using StudentCourseManagement.Middleware;
+﻿using Freelance_Project_Management_Platform.Middleware;
 
 namespace Freelance_Project_Management_Platform.Extensions
 {

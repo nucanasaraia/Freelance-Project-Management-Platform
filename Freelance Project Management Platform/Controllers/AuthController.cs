@@ -28,6 +28,13 @@ namespace Freelance_Project_Management_Platform.Controllers
             return StatusCode((int)result.Status, result);
         }
 
+        [HttpPost("verify-email")]
+        public async Task<IActionResult> VerifyEmail(VerifyEmailRequest request)
+        {
+            var result = await _authService.VerifyEmail(request);
+            return StatusCode((int)result.Status, result);
+        }
+
         [HttpPost("login")]
         public async Task<IActionResult> LogIn(LogInRequest request)
         {
@@ -45,13 +52,6 @@ namespace Freelance_Project_Management_Platform.Controllers
             });
 
             return Ok(response);
-        }
-
-        [HttpPost("verify-email")]
-        public async Task<IActionResult> VerifyEmail(VerifyEmailRequest request)
-        {
-            var result = await _authService.VerifyEmail(request);
-            return StatusCode((int)result.Status, result);
         }
 
         [HttpPost("refresh-token")]
@@ -80,9 +80,9 @@ namespace Freelance_Project_Management_Platform.Controllers
 
 
         [HttpPost("forgot-password")]
-        public async Task<IActionResult> ForgotPassword(string email)
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
         {
-            var result = await _authService.ForgotPassword(email);
+            var result = await _authService.ForgotPassword(request.Email);
             return StatusCode((int)result.Status, result);
         }
 

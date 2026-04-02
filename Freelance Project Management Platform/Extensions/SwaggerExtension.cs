@@ -1,6 +1,6 @@
 ﻿using Microsoft.OpenApi.Models;
 
-namespace StudentCourseManagement.Extensions
+namespace Freelance_Project_Management_Platform.Extensions
 {
     public static class SwaggerExtension
     {

@@ -56,8 +56,9 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
                 var result = _mapper.Map<List<UserDto>>(users);
                 return ApiResponseFactory.Success(result);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(GetAllUsers));
                 return ApiResponseFactory.ServerError<List<UserDto>>("Unexpected error occurred");
             }
         }

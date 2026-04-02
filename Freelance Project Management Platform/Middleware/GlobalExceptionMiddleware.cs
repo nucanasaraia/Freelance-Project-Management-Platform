@@ -3,7 +3,7 @@ using Serilog;
 using System.Net;
 using System.Text.Json;
 
-namespace StudentCourseManagement.Middleware
+namespace Freelance_Project_Management_Platform.Middleware
 {
     public class GlobalExceptionMiddleware
     {
