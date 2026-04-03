@@ -4,6 +4,7 @@ using Freelance_Project_Management_Platform.Request;
 using Freelance_Project_Management_Platform.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using System.Net;
 
 namespace Freelance_Project_Management_Platform.Controllers
@@ -18,6 +19,7 @@ namespace Freelance_Project_Management_Platform.Controllers
             _authService = authService;
         }
 
+        [EnableRateLimiting("auth")]
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegistrationRequest request)
         {

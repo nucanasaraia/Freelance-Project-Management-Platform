@@ -2,9 +2,11 @@
 using Freelance_Project_Management_Platform.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace Freelance_Project_Management_Platform.Controllers
 {
+    [EnableRateLimiting("general")]
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
@@ -17,14 +19,14 @@ namespace Freelance_Project_Management_Platform.Controllers
             _projectService = projectService;
         }
 
-        [HttpPost("create")]
+        [HttpPost]
         public async Task<IActionResult> CreateProject(AddProject request)
         {
             var result = await _projectService.CreateProject(request);
             return StatusCode((int)result.Status, result);
         }
 
-        [HttpGet("all")]
+        [HttpGet]
         public async Task<IActionResult> GetAllProjects()
         {
             var result = await _projectService.GetAllProjects();

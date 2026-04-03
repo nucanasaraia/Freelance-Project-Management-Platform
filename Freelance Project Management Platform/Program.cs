@@ -14,6 +14,7 @@ builder.Services.AddControllers();
 builder.Services.ConfigureDatabase(builder.Configuration);
 builder.Services.ConfigureServices();
 builder.Services.ConfigureSwagger();
+builder.Services.ConfigureRateLimiting();
 builder.Services.ConfigureValidation();
 builder.Services.ConfigureMapping();
 builder.Services.ConfigureJwt(builder.Configuration);
@@ -25,6 +26,8 @@ var app = builder.Build();
 
 
 // Middleware
+app.UseRateLimiter();
+
 app.UseAuthentication();
 app.UseAuthorization();
 

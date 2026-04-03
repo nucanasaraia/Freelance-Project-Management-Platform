@@ -1,5 +1,6 @@
 ﻿using FluentValidation;
 using FluentValidation.AspNetCore;
+using Freelance_Project_Management_Platform.Validations;
 
 namespace Freelance_Project_Management_Platform.Extensions
 {
@@ -9,6 +10,9 @@ namespace Freelance_Project_Management_Platform.Extensions
         {
             services.AddFluentValidationAutoValidation();
             services.AddValidatorsFromAssemblyContaining<RegisterValidator>();
+            services.AddValidatorsFromAssemblyContaining<LoginValidator>();
+            services.AddValidatorsFromAssemblyContaining<AddProjectValidator>();
+            services.AddValidatorsFromAssemblyContaining<PasswordResetValidator>();
         }
     }
 }
