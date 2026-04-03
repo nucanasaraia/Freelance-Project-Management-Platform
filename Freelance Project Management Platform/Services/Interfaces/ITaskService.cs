@@ -8,7 +8,7 @@ namespace Freelance_Project_Management_Platform.Services.Interfaces
     public interface ITaskService
     {
         Task<ApiResponse<TaskDto>> CreateTask(int projectId, AddTask request);
-        Task<ApiResponse<List<TaskDto>>> GetProjectTasks(int projectId);
+        Task<ApiResponse<PagedResult<TaskDto>>> GetProjectTasks(int projectId, PaginationParams pagination);
         Task<ApiResponse<string>> AssignTask(int taskId, int assigneeId);
         Task<ApiResponse<string>> DeleteTask(int taskId);
         Task<ApiResponse<string>> UpdateTaskStatus(int taskId, TASK_STATUS status);

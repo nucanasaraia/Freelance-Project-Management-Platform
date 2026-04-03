@@ -7,7 +7,7 @@ namespace Freelance_Project_Management_Platform.Services.Interfaces
     public interface IProjectService
     {
         Task<ApiResponse<ProjectDto>> CreateProject(AddProject request);
-        Task<ApiResponse<List<ProjectDto>>> GetAllProjects();
+        Task<ApiResponse<PagedResult<ProjectDto>>> GetAllProjects(PaginationParams pagination);
         Task<ApiResponse<ProjectDto>> GetProject(int projectId);
         Task<ApiResponse<string>> UpdateProject(int projectId, AddProject request);
         Task<ApiResponse<string>> DeleteProject(int projectId);

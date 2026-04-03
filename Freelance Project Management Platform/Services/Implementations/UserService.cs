@@ -3,6 +3,7 @@ using Freelance_Project_Management_Platform.CORE;
 using Freelance_Project_Management_Platform.Data;
 using Freelance_Project_Management_Platform.DTOs;
 using Freelance_Project_Management_Platform.Enum;
+using Freelance_Project_Management_Platform.Request;
 using Freelance_Project_Management_Platform.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -47,19 +48,37 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
                 return ApiResponseFactory.ServerError<string>("Unexpected error occurred");
             }
         }
-        public async Task<ApiResponse<List<UserDto>>> GetAllUsers()
+        public async Task<ApiResponse<PagedResult<UserDto>>> GetAllUsers(PaginationParams pagination)
         {
             try
             {
-                var users = await _context.Users.ToListAsync();
+                if (pagination.Page <= 0) pagination.Page = 1;
 
-                var result = _mapper.Map<List<UserDto>>(users);
+                var query = _context.Users
+                    .AsNoTracking();
+
+                var totalCount = await query.CountAsync();
+
+                var users = await query
+                    .OrderBy(u => u.Id) 
+                    .Skip((pagination.Page - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize)
+                    .ToListAsync();
+
+                var result = new PagedResult<UserDto>
+                {
+                    Items = _mapper.Map<List<UserDto>>(users),
+                    TotalCount = totalCount,
+                    Page = pagination.Page,
+                    PageSize = pagination.PageSize
+                };
+
                 return ApiResponseFactory.Success(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(GetAllUsers));
-                return ApiResponseFactory.ServerError<List<UserDto>>("Unexpected error occurred");
+                return ApiResponseFactory.ServerError<PagedResult<UserDto>>("Unexpected error occurred");
             }
         }
     }

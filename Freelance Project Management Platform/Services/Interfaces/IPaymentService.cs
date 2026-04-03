@@ -8,6 +8,6 @@ namespace Freelance_Project_Management_Platform.Services.Interfaces
     {
         Task<ApiResponse<PaymentDto>> CreatePayment(int ProjectId, AddPayment request);
         Task<ApiResponse<string>> ConfirmPayment(int paymentId);
-        Task<ApiResponse<List<PaymentDto>>> GetProjectPayments(int projectId);
+        Task<ApiResponse<PagedResult<PaymentDto>>> GetProjectPayments(int projectId, PaginationParams pagination);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Freelance_Project_Management_Platform.CORE;
 using Freelance_Project_Management_Platform.DTOs;
+using Freelance_Project_Management_Platform.Request;
 using Freelance_Project_Management_Platform.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -19,9 +20,9 @@ namespace Freelance_Project_Management_Platform.Controllers
         }
 
         [HttpGet("All")]
-        public async Task<IActionResult> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers([FromQuery] PaginationParams pagination)
         {
-            var result = await _userService.GetAllUsers();
+            var result = await _userService.GetAllUsers(pagination);
             return StatusCode((int)result.Status, result);
         }
 

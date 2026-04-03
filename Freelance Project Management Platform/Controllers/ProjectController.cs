@@ -27,9 +27,9 @@ namespace Freelance_Project_Management_Platform.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllProjects()
+        public async Task<IActionResult> GetAllProjects([FromQuery] PaginationParams pagination)
         {
-            var result = await _projectService.GetAllProjects();
+            var result = await _projectService.GetAllProjects(pagination);
             return StatusCode((int)result.Status, result);
         }
 

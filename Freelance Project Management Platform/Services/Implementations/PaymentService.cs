@@ -6,6 +6,7 @@ using Freelance_Project_Management_Platform.Enum;
 using Freelance_Project_Management_Platform.Models;
 using Freelance_Project_Management_Platform.Request;
 using Freelance_Project_Management_Platform.Services.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 
@@ -99,21 +100,33 @@ public class PaymentService : IPaymentService
         }
     }
 
-    public async Task<ApiResponse<List<PaymentDto>>> GetProjectPayments(int projectId)
+    public async Task<ApiResponse<PagedResult<PaymentDto>>> GetProjectPayments(int projectId, PaginationParams pagination)
     {
         try
         {
-            var payments = await _context.Payments
-            .Where(p => p.ProjectId == projectId && p.ClientId == _currentUser.UserId)
-            .ToListAsync();
-
-            if (!payments.Any())
+            if(pagination.Page <= 0 || pagination.PageSize <= 0 || pagination.PageSize > 50)
             {
-                _logger.LogInfo(null, "No payments found for project: {ProjectId}", projectId);
-                return ApiResponseFactory.Success(new List<PaymentDto>());
+                _logger.LogWarning(null,"Invalid pagination parameters: Page {Page}, PageSize {PageSize}", pagination.Page, pagination.PageSize);
+                return ApiResponseFactory.BadRequest<PagedResult<PaymentDto>>("Invalid pagination parameters");
             }
 
-            var result = _mapper.Map<List<PaymentDto>>(payments);
+            var query =  _context.Payments
+                .AsNoTracking()
+                .Where(p => p.ProjectId == projectId && p.ClientId == _currentUser.UserId);
+
+            var totalCount = await query.CountAsync();
+            var payments = await query
+                .Skip((pagination.Page - 1) * pagination.PageSize)
+                .Take(pagination.PageSize)
+                .ToListAsync();
+
+            var result = new PagedResult<PaymentDto>
+            {
+                Items = _mapper.Map<List<PaymentDto>>(payments),
+                TotalCount = totalCount,
+                Page = pagination.Page,
+                PageSize = pagination.PageSize
+            };
 
             _logger.LogInfo(null,"Retrieved {Count} payments for project {ProjectId}", payments.Count, projectId);
             return ApiResponseFactory.Success(result);
@@ -121,7 +134,7 @@ public class PaymentService : IPaymentService
         catch (Exception ex)
         {
             _logger.LogError(null,ex,"Unexpected error occurred");
-            return ApiResponseFactory.ServerError<List<PaymentDto>>("Unexpected error occurred");
+            return ApiResponseFactory.ServerError<PagedResult<PaymentDto>>("Unexpected error occurred");
         }
     }
 }

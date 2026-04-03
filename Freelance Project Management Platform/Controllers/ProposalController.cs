@@ -39,9 +39,9 @@ namespace Freelance_Project_Management_Platform.Controllers
         }
 
         [HttpGet("project/{projectId}")]
-        public async Task<IActionResult> GetProjectProposals(int projectId)
+        public async Task<IActionResult> GetProjectProposals(int projectId, [FromQuery] PaginationParams pagination)
         {
-            var result = await _proposalService.GetProjectProposals(projectId);
+            var result = await _proposalService.GetProjectProposals(projectId, pagination);
             return StatusCode((int)result.Status, result);
         }
 

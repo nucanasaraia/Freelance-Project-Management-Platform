@@ -7,6 +7,7 @@ using Freelance_Project_Management_Platform.Models;
 using Freelance_Project_Management_Platform.Request;
 using Freelance_Project_Management_Platform.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Freelance_Project_Management_Platform.Services.Implementations
 {
@@ -110,27 +111,40 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
             }
         }
 
-        public async Task<ApiResponse<List<ProposalDto>>> GetProjectProposals(int projectId)
+        public async Task<ApiResponse<PagedResult<ProposalDto>>> GetProjectProposals(int projectId, PaginationParams pagination)
         {
             try
             {
                 var userId = _currentUser.UserId;
 
-                var proposals = await _context.Proposals
-                    .Include(p => p.Project)
-                    .Where(p => p.ProjectId == projectId && p.Project.ClientId == userId)
+                if (pagination.Page <= 0) pagination.Page = 1;
+
+                var query = _context.Proposals
+                    .AsNoTracking()
+                    .Where(p => p.ProjectId == projectId && p.Project.ClientId == userId);
+
+                var totalCount = await query.CountAsync();
+
+                var proposals = await query
+                    .OrderByDescending(p => p.CreatedAt)
+                    .Skip((pagination.Page - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize)
                     .ToListAsync();
 
-                if (!proposals.Any())
-                    return ApiResponseFactory.Success(new List<ProposalDto>());
+                var result = new PagedResult<ProposalDto>
+                {
+                    Items = _mapper.Map<List<ProposalDto>>(proposals),
+                    TotalCount = totalCount,
+                    Page = pagination.Page,
+                    PageSize = pagination.PageSize
+                };
 
-                var result = _mapper.Map<List<ProposalDto>>(proposals);
                 return ApiResponseFactory.Success(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(GetProjectProposals));
-                return ApiResponseFactory.ServerError<List<ProposalDto>>("Unexpected error occurred");
+                return ApiResponseFactory.ServerError<PagedResult<ProposalDto>>("Unexpected error occurred");
             }
         }
 

@@ -32,9 +32,9 @@ namespace Freelance_Project_Management_Platform.Controllers
         }
 
         [HttpGet("project/{projectId}")]
-        public async Task<IActionResult> GetProjectPayments(int projectId)
+        public async Task<IActionResult> GetProjectPayments(int projectId,[FromQuery] PaginationParams pagination)
         {
-            var result = await _paymentService.GetProjectPayments(projectId);
+            var result = await _paymentService.GetProjectPayments(projectId, pagination);
             return StatusCode((int)result.Status, result);
         }
     }

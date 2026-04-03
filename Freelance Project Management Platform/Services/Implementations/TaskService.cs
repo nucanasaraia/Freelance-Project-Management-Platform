@@ -104,33 +104,48 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
             }
         }
 
-        public async Task<ApiResponse<List<TaskDto>>> GetProjectTasks(int projectId)
+        public async Task<ApiResponse<PagedResult<TaskDto>>> GetProjectTasks(int projectId, PaginationParams pagination)
         {
             try
             {
+                var userId = _currentUser.UserId;
+
                 var project = await _context.Projects
-                    .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == _currentUser.UserId);
+                    .FirstOrDefaultAsync(p => p.Id == projectId && p.ClientId == userId);
 
                 if (project == null)
-                    return ApiResponseFactory.NotFound<List<TaskDto>>("Project not found or access denied");
-
-                var tasks = await _context.TaskItems
-                    .Where(t => t.ProjectId == projectId)
-                    .ToListAsync();
-
-
-                if (!tasks.Any())
                 {
-                    return ApiResponseFactory.Success(new List<TaskDto>());
+                    return ApiResponseFactory.NotFound<PagedResult<TaskDto>>("Project not found");
                 }
 
-                var result = _mapper.Map<List<TaskDto>>(tasks);
+                if (pagination.Page <= 0) pagination.Page = 1;
+
+                var query = _context.TaskItems
+                    .AsNoTracking()
+                    .Where(t => t.ProjectId == projectId);
+
+                var totalCount = await query.CountAsync();
+
+                var tasks = await query
+                    .OrderByDescending(t => t.CreatedAt)
+                    .Skip((pagination.Page - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize)
+                    .ToListAsync();
+
+                var result = new PagedResult<TaskDto>
+                {
+                    Items = _mapper.Map<List<TaskDto>>(tasks),
+                    TotalCount = totalCount,
+                    Page = pagination.Page,
+                    PageSize = pagination.PageSize
+                };
+
                 return ApiResponseFactory.Success(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(GetProjectTasks));
-                return ApiResponseFactory.ServerError<List<TaskDto>>("Unexpected error occurred");
+                return ApiResponseFactory.ServerError<PagedResult<TaskDto>>("Unexpected error occurred");
             }
         }
 

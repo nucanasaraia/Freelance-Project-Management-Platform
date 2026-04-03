@@ -100,28 +100,36 @@ namespace Freelance_Project_Management_Platform.Services.Implementations
             }
         }
 
-        public async Task<ApiResponse<List<ProjectDto>>> GetAllProjects()
+        public async Task<ApiResponse<PagedResult<ProjectDto>>> GetAllProjects(PaginationParams pagination)
         {
             try
             {
                 var userId = _currentUser.UserId;
 
-                var projects = await _context.Projects
-                    .Where(p => p.ClientId == userId)
+                var query = _context.Projects
+                    .Where(p => p.ClientId == userId);
+
+                var totalCount = await query.CountAsync();
+
+                var projects = await query
+                    .Skip((pagination.Page - 1) * pagination.PageSize)
+                    .Take(pagination.PageSize)
                     .ToListAsync();
 
-                if (!projects.Any())
+                var result = new PagedResult<ProjectDto>
                 {
-                    return ApiResponseFactory.Success(new List<ProjectDto>());
-                }
+                    Items = _mapper.Map<List<ProjectDto>>(projects),
+                    TotalCount = totalCount,
+                    Page = pagination.Page,
+                    PageSize = pagination.PageSize
+                };
 
-                var result = _mapper.Map<List<ProjectDto>>(projects);
                 return ApiResponseFactory.Success(result);
             }
             catch (Exception ex)
             {
                 _logger.LogError(null, ex, "Unexpected error in {MethodName}", nameof(GetAllProjects));
-                return ApiResponseFactory.ServerError<List<ProjectDto>>("Unexpected error occurred");
+                return ApiResponseFactory.ServerError<PagedResult<ProjectDto>>("Unexpected error occurred");
             }
         }
 
