@@ -7,6 +7,7 @@ using Freelance_Project_Management_Platform.Request;
 using Freelance_Project_Management_Platform.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Net;
 using System.Security.Cryptography;
 
@@ -52,13 +53,11 @@ public class AuthService : IAuthService
                 VerificationCodeExpires = DateTime.UtcNow.AddMinutes(10)
             };
 
-            var emailResult = await _emailService.SendVerificationCode(email, user.Username, verificationCode);
+            // Email service disabled in demo - works locally with Gmail SMTP
+            await _emailService.SendVerificationCode(user.Email, user.Username, user.VerificationCode);
 
-            if (emailResult.Status != HttpStatusCode.OK)
-            {
-                _logger.LogWarning(null, "Failed sending verification email to {Email}", email);
-                return ApiResponseFactory.BadRequest<string>("Failed to send verification email");
-            }
+            // Auto verify for demo purposes
+            user.EmailVerified = true;
 
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
