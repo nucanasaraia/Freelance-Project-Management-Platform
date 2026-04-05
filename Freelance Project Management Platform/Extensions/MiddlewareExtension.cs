@@ -14,7 +14,6 @@ namespace Freelance_Project_Management_Platform.Extensions
             app.UseSwaggerUI();
             
 
-            app.UseHttpsRedirection();
             app.MapControllers();
         }
     }
