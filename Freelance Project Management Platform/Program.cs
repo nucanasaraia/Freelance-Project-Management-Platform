@@ -1,5 +1,7 @@
 using Freelance_Project_Management_Platform.Configurations;
+using Freelance_Project_Management_Platform.Data;
 using Freelance_Project_Management_Platform.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -27,6 +29,11 @@ builder.WebHost.UseUrls($"http://*:{port}");
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<DataContext>();
+    db.Database.Migrate();
+}
 
 // Middleware
 app.UseRateLimiter();
