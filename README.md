@@ -37,7 +37,7 @@ It allows clients to create and manage projects, freelancers to work on them, an
 ## 🛠️ Tech Stack
 
 - **Backend:** ASP.NET Core Web API  
-- **Database:** SQL Server + Entity Framework Core  
+- **Database:** PostgreSQL (production) / SQL Server (local) + Entity Framework Core
 - **Authentication:** JWT (JSON Web Tokens)  
 - **Architecture:** Layered (Controllers → Services → Data Access)  
 
@@ -115,6 +115,12 @@ After running the project, open:
 ```
 https://localhost:{port}/swagger
 ```
+
+## 🌐 Live Demo
+https://freelance-project-management-platform-production.up.railway.app/swagger/index.html
+
+> ⚠️ Email verification is auto-confirmed in the live demo.  
+> Full email functionality works locally with Gmail SMTP configuration.
 
 Use Swagger UI to explore and test all endpoints.
 
